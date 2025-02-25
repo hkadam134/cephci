@@ -126,33 +126,33 @@ class FsUtils(object):
                 client.node.exec_command(
                     cmd="git clone https://github.com/bengland2/smallfile.git"
                 )
-            if "iozone" not in out:
-                cmd_list = [
-                    "cd /home/cephuser;wget http://www.iozone.org/src/current/iozone3_506.tar;",
-                    "cd /home/cephuser;tar xvf iozone3_506.tar",
-                    "sudo yum install make -y --nogpgcheck",
-                    "cd /home/cephuser/iozone3_506/src/current/;make;make linux",
-                    "export PATH=$PATH:/home/cephuser/iozone3_506/src/current/",
-                ]
-                for cmd in cmd_list:
-                    client.node.exec_command(cmd=cmd)
-            out, rc = client.node.exec_command(
-                sudo=True, cmd="rpm -qa | grep -w 'dbench'", check_ec=False
-            )
-            if "dbench" not in out:
-                log.info("Installing dbench")
-                client.node.exec_command(
-                    sudo=True,
-                    cmd=(
-                        "rhel_version=$(rpm -E %rhel) && "
-                        "dnf config-manager --add-repo="
-                        "https://download.fedoraproject.org/pub/epel/${rhel_version}/Everything/x86_64/"
-                    ),
-                )
-                client.node.exec_command(
-                    sudo=True,
-                    cmd="dnf install dbench -y --nogpgcheck",
-                )
+            # if "iozone" not in out:
+            #     cmd_list = [
+            #         "cd /home/cephuser;wget http://www.iozone.org/src/current/iozone3_506.tar;",
+            #         "cd /home/cephuser;tar xvf iozone3_506.tar",
+            #         "sudo yum install make -y --nogpgcheck",
+            #         "cd /home/cephuser/iozone3_506/src/current/;make;make linux",
+            #         "export PATH=$PATH:/home/cephuser/iozone3_506/src/current/",
+            #     ]
+            #     for cmd in cmd_list:
+            #         client.node.exec_command(cmd=cmd)
+            # out, rc = client.node.exec_command(
+            #     sudo=True, cmd="rpm -qa | grep -w 'dbench'", check_ec=False
+            # )
+            # if "dbench" not in out:
+            #     log.info("Installing dbench")
+            #     client.node.exec_command(
+            #         sudo=True,
+            #         cmd=(
+            #             "rhel_version=$(rpm -E %rhel) && "
+            #             "dnf config-manager --add-repo="
+            #             "https://download.fedoraproject.org/pub/epel/${rhel_version}/Everything/x86_64/"
+            #         ),
+            #     )
+            #     client.node.exec_command(
+            #         sudo=True,
+            #         cmd="dnf install dbench -y --nogpgcheck",
+            #     )
         if (
             hasattr(clients[0].node, "vm_node")
             and clients[0].node.vm_node.node_type == "baremetal"
@@ -1055,7 +1055,8 @@ class FsUtils(object):
             kernel_cmd = (
                 f"mount -t ceph {mon_node_ip}:{kwargs.get('sub_dir', '/')} {mount_point} "
                 f"-o name={kwargs.get('new_client_hostname', client.node.hostname)},"
-                f"secretfile=/etc/ceph/{kwargs.get('new_client_hostname', client.node.hostname)}.secret"
+                f"secretfile=/etc/ceph/{kwargs.get('new_client_hostname', client.node.hostname)}.secret,"
+                f"noshare"
             )
 
             if kwargs.get("extra_params"):
@@ -1086,7 +1087,8 @@ class FsUtils(object):
                 fstab_entry = (
                     f"{mon_node_ip}:{kwargs.get('sub_dir', '/')}    {mount_point}    ceph    "
                     f"name={kwargs.get('new_client_hostname', client.node.hostname)},"
-                    f"secretfile=/etc/ceph/{kwargs.get('new_client_hostname', client.node.hostname)}.secret"
+                    f"secretfile=/etc/ceph/{kwargs.get('new_client_hostname', client.node.hostname)}.secret,"
+                    f"noshare"
                 )
                 if kwargs.get("extra_params"):
                     fstab_entry += f"{kwargs.get('extra_params')}"
